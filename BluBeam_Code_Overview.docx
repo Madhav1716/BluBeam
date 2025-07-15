@@ -1,0 +1,103 @@
+BluBeam: Main Code Overview
+
+---
+
+# Table of Contents
+1. Introduction
+2. app/HomeScreen.tsx
+3. app/ChatScreen.tsx
+4. app/createAccountScreen.tsx
+5. lib/bluetooth.ts
+6. lib/bleAdvertiser.ts
+7. Other Key Files
+
+---
+
+## 1. Introduction
+BluBeam is a Bluetooth-based P2P chat app built with React Native and Expo. This document summarizes the main code files and explains the purpose and logic of each, to help you understand and extend the project.
+
+---
+
+## 2. app/HomeScreen.tsx
+**Purpose:**
+- Main landing screen after login.
+- Shows a list of nearby users (found via BLE scan).
+- Starts BLE advertising and scanning automatically on Android.
+
+**Main Logic:**
+- On mount, checks for user credentials and starts BLE advertising (so the device is discoverable).
+- Starts continuous BLE scanning (on Android) to find nearby devices.
+- Updates the list of users in real time.
+- Allows navigation to ChatScreen for a selected user.
+
+---
+
+## 3. app/ChatScreen.tsx
+**Purpose:**
+- Chat UI between two users.
+- Allows sending messages over BLE to a selected device.
+
+**Main Logic:**
+- Displays a chat interface with message history (local only).
+- When a message is sent, connects to the selected device and writes the message using BLE.
+- (Currently, does not receive messages passively due to BLE library limitations.)
+
+---
+
+## 4. app/createAccountScreen.tsx
+**Purpose:**
+- Handles user account creation.
+- Generates and stores a username and cryptographic keypair.
+
+**Main Logic:**
+- Lets the user enter a username.
+- Generates a public/private keypair and stores them securely.
+- Redirects to HomeScreen after account creation.
+
+---
+
+## 5. lib/bluetooth.ts
+**Purpose:**
+- Centralizes BLE logic for scanning, connecting, and sending messages (central/client role).
+
+**Main Logic:**
+- Exports a BLE manager instance.
+- Provides functions to:
+  - Connect to a device by ID.
+  - Send a message to a device (write to characteristic).
+  - Monitor for incoming messages (if supported by the device).
+- Used by HomeScreen and ChatScreen for BLE operations.
+
+---
+
+## 6. lib/bleAdvertiser.ts
+**Purpose:**
+- Handles BLE advertising (peripheral/server role) so the device can be discovered by others.
+
+**Main Logic:**
+- Exports functions to:
+  - Request BLE permissions (Android).
+  - Start advertising with the device's username and service UUID.
+  - Stop advertising when not needed.
+- Advertising is started automatically on HomeScreen.
+- (Current BLE libraries do not support handling incoming writes in JS.)
+
+---
+
+## 7. Other Key Files
+
+### app/_layout.tsx
+- Sets up navigation stack and theming for the app.
+
+### app/index.tsx
+- Entry point; checks for user credentials and redirects to HomeScreen or createAccountScreen.
+
+### constants/Colors.ts
+- Centralized color palette for light/dark themes.
+
+### README.md
+- Project overview, features, setup, and usage instructions.
+
+---
+
+**For more details or code samples from any file, just ask!** 

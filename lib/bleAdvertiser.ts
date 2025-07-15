@@ -28,10 +28,8 @@ export function startAdvertising(deviceName: string) {
   BleAdvertiser.setCompanyId(0x1234); // Example company ID
   // manufacturerData should be a number[]
   const manufacturerData = Array.from(deviceName, (c) => c.charCodeAt(0));
-  BleAdvertiser.broadcast(SERVICE_UUID, [CHAR_UUID], {
-    includeDeviceName: true,
-    manufacturerData,
-  })
+  // Try minimal call with only required arguments
+  BleAdvertiser.broadcast(SERVICE_UUID, [CHAR_UUID])
     .then((success) => console.log("🚀 Advertising started:", success))
     .catch((error) => console.log("❌ Advertising error:", error));
 

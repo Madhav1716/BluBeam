@@ -1,8 +1,9 @@
 //ChatSCreen.tsx
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { connectToDevice, sendMessageToDevice } from "../lib/bluetooth";
+
 import {
   Alert,
   FlatList,
@@ -14,7 +15,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { connectToDevice, sendMessageToDevice } from "../lib/bluetooth";
 
 interface Message {
   id: string;
@@ -57,12 +57,32 @@ export default function ChatScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    const getUsername = async () => {
-      const storedUsername = await AsyncStorage.getItem("username");
-      setUsername(storedUsername || "Unknown");
+    let subscription: any;
+
+    const startListening = async () => {
+      try {
+        const device = await connectToDevice(id as string);
+        subscription = monitorIncomingMessages(device, (text: string) => {
+          const incomingMessage: Message = {
+            id: Date.now().toString(),
+            text,
+            isFromMe: false,
+            timestamp: new Date(),
+            status: "seen",
+          };
+          setMessages((prev) => [...prev, incomingMessage]);
+        });
+      } catch (error) {
+        console.log("❌ Error setting up message listener:", error);
+      }
     };
-    getUsername();
-  }, []);
+
+    startListening();
+
+    return () => {
+      if (subscription) subscription.remove?.();
+    };
+  }, [id]);
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -219,6 +239,27 @@ export default function ChatScreen() {
           <Text style={styles.sendButtonText}>📤</Text>
         </TouchableOpacity>
       </View>
+      {/* Temporary Button to Simulate Incoming Message */}
+      <TouchableOpacity
+        onPress={() => {
+          const incomingMessage = {
+            id: Date.now().toString(),
+            text: "👋 This is a simulated incoming message!",
+            isFromMe: false,
+            timestamp: new Date(),
+            status: "seen",
+          };
+          setMessages((prev) => [...prev, incomingMessage]);
+        }}
+        style={{
+          backgroundColor: "#ccc",
+          margin: 10,
+          padding: 12,
+          borderRadius: 8,
+          alignItems: "center",
+        }}>
+        <Text style={{ fontWeight: "600" }}>📩 Simulate Incoming Message</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }

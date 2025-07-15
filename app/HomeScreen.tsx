@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -43,12 +44,26 @@ export default function HomeScreen() {
       // Request BLE permissions and start advertising
       await requestPermissions();
       startAdvertising(existingUsername);
+
+      // ⛔ Skip BLE scanning if you're testing with one device
+      // ✅ Insert dummy users for testing
+      setNearbyUsers([
+        {
+          id: "mock-1",
+          name: "Test User 💡",
+          publicKey: "mock-public-key-1",
+        },
+      ]);
     };
 
     checkUserAccount();
 
     return () => {
       stopAdvertising();
+      if (Platform.OS === "android") {
+        manager.stopDeviceScan();
+        setScanning(false);
+      }
     };
   }, []);
 
@@ -117,11 +132,7 @@ export default function HomeScreen() {
           <Text style={styles.welcome}>Welcome</Text>
           <Text style={styles.username}>{username}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.refreshBtn}
-          onPress={scanning ? stopBLEScan : startBLEScan}>
-          <Text style={styles.refreshText}>{scanning ? "⏹" : "🔄"}</Text>
-        </TouchableOpacity>
+        {/* Optionally, you can remove the scan button for Android, or keep it for manual refresh on iOS. */}
       </View>
 
       <Text style={styles.heading}>Nearby Users</Text>
