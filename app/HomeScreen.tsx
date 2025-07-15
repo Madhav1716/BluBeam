@@ -10,6 +10,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  requestPermissions,
+  startAdvertising,
+  stopAdvertising,
+} from "../lib/bleAdvertiser";
 import { manager } from "../lib/bluetooth";
 
 // ❌ BLE disabled for now – enable when using Dev Client or APK
@@ -34,9 +39,17 @@ export default function HomeScreen() {
 
       setUsername(existingUsername);
       console.log("👤 Logged in as:", existingUsername);
+
+      // Request BLE permissions and start advertising
+      await requestPermissions();
+      startAdvertising(existingUsername);
     };
 
     checkUserAccount();
+
+    return () => {
+      stopAdvertising();
+    };
   }, []);
 
   // BLE scan logic
